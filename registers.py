@@ -1,15 +1,17 @@
-import win32com.client
 import os
 from datetime import date, datetime
+
+import win32com.client
 
 
 # функция возвращающая следующий месяц
 def next_month(month):
-    month_list = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль',
-                  'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь', 'Январь']
+    month_list = [
+        'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август',
+        'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь', 'Январь'
+    ]
     month_index = month_list.index(month)
-    month_next = month_list[month_index + 1]
-    return month_next
+    return month_list[month_index + 1]
 
 
 # функция создающая форму для пустых реестров на 10 строк
@@ -42,7 +44,8 @@ def check_date(estimated_date):
 # функция заполняющая реестр в экселе
 def report_generation(register_number, register_name):
     this_path = os.getcwd()
-    files_location = f'{this_path}\Подтверждающие документы\Реестр {register_number}'
+    files_location = (rf'{this_path}\Подтверждающие документы\Реестр '
+                      rf'{register_number}')
 
     files_name = os.listdir(files_location)
     files_list = []
@@ -55,15 +58,17 @@ def report_generation(register_number, register_name):
     tem_sh.Range('A9:E15').Copy(sh_change.Range('A208:E214'))
     sh_change.Range('C208').value = '=СУММ(C8:C207)'
 
-    # цикл заполняет список с именами файлов без расширения и список с датами изменения файлов
+    # цикл заполняет список с именами файлов без расширения
+    # и список с датами изменения файлов
     for i in range(len(files_name)):
         z = files_name[i].rfind('.')
         files_list.append(files_name[i][:z])
-        file_time = os.path.getmtime(f'{files_location}\{files_name[i]}')
+        file_time = os.path.getmtime(rf'{files_location}\{files_name[i]}')
         file_date = date.fromtimestamp(file_time).strftime('%d.%m.%Y')
         files_date.append(file_date)
 
-    # часть кода, которая изменяет дату в списке на дату из имени файла, и удаляет ее в имени
+    # часть кода, которая изменяет дату в списке на дату из имени файла
+    # и удаляет ее в имени
     shear_list_date = [[-10, None], [-8, None], [None, 10], [None, 8]]
     shear_list_name = [[-11, None], [-9, None], [None, 11], [None, 9]]
 
@@ -86,7 +91,6 @@ def report_generation(register_number, register_name):
         db[i].insert(0, i + 1)
 
     # записываем в файл эксель и удаляем лишние строки
-
     sh_change.Range('A3').value = f'РЕЕСТР №{register_number}'
     sh_change.Range('A4').value = register_name
     sh_change.Range('A5').value = month_year
@@ -97,8 +101,8 @@ def report_generation(register_number, register_name):
         sh_change.Cells(row + 8, 2).value = db[row][1]
         sh_change.Cells(row + 8, 4).value = db[row][2]
         row_not_del += 1
-
-    sh_change.Range(sh_change.Cells(row_not_del, 1), sh_change.Cells(207, 1)).EntireRow.Delete()
+    sh_change.Range(sh_change.Cells(row_not_del, 1),
+                    sh_change.Cells(207, 1)).EntireRow.Delete()
 
 
 #######################
@@ -150,7 +154,7 @@ try:
     sh_change.Range('A4').value = tem_sh.Range('H14').value
     sh_change.Range('A5').value = month_year
     sh_change.Range('A8').value = '1'
-    sh_change.Range('B8').value = f'План работы на квартал'
+    sh_change.Range('B8').value = 'План работы на квартал'
     sh_change.Range('D8').value = datetime.today().strftime('%d.%m.%Y')
 except Exception:
     pass
@@ -176,13 +180,12 @@ try:
     sh_change.Range('A4').value = tem_sh.Range('H16').value
     sh_change.Range('A5').value = month_year
     sh_change.Range('A8').value = '1'
-    sh_change.Range('B8').value = f'Отчет работы за квартал'
+    sh_change.Range('B8').value = 'Отчет работы за квартал'
     sh_change.Range('D8').value = datetime.today().strftime('%d.%m.%Y')
 except Exception:
     pass
 
 # заполняем оставшиеся реестры
-
 reg_num_list = []
 for i in range(17, 29):
     if tem_sh.Cells(i, 7).value != '-':
